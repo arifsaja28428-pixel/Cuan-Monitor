@@ -2,7 +2,7 @@ import google.generativeai as genai
 import requests
 
 # 1. Setting API (Ganti dengan API Key milikmu nanti)
-GEMINI_KEY = "PASTE_API_GEMINI_DISINI"
+GEMINI_KEY = "AIzaSyCiO_zKOyLUkBu_mkYTnEBCLhLRVtxXLJE"
 genai.configure(api_key=GEMINI_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
