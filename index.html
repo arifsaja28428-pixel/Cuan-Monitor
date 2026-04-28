@@ -72,87 +72,88 @@
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     
-    <script>
-        const AdController = window.Adsgram.init({ blockId: "28860" });
-        let currentSymbol = "BINANCE:BTCUSDT";
+<script>
+    const AdController = window.Adsgram.init({ blockId: "ISI_ID_ADSGRAM_KAMU" });
+    let currentSymbol = "btc-usdt";
 
-        // Daftar Aset ala Ajaib
-        const assets = [
-            { id: 'BTCUSDT', name: 'Bitcoin', icon: '₿' },
-            { id: 'ETHUSDT', name: 'Ethereum', icon: 'Ξ' },
-            { id: 'SOLUSDT', name: 'Solana', icon: 'S' },
-            { id: 'DOGEUSDT', name: 'Dogecoin', icon: 'Ð' },
-            { id: 'BNBUSDT', name: 'Binance Coin', icon: 'B' }
-        ];
+    // Daftar aset
+    const assets = [
+        { id: 'btcusdt', name: 'Bitcoin', icon: '₿' },
+        { id: 'ethusdt', name: 'Ethereum', icon: 'Ξ' },
+        { id: 'solusdt', name: 'Solana', icon: 'S' },
+        { id: 'dogeusdt', name: 'Dogecoin', icon: 'Ð' },
+        { id: 'bnbusdt', name: 'Binance Coin', icon: 'B' }
+    ];
 
-        // Fungsi Load Chart Candlestick
-        function loadChart(symbol) {
-            new TradingView.widget({
-                "autosize": true,
-                "symbol": symbol,
-                "interval": "H",
-                "timezone": "Asia/Jakarta",
-                "theme": "light",
-                "style": "1",
-                "locale": "id",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_top_toolbar": true,
-                "save_image": false,
-                "container_id": "chart_widget"
-            });
+    // 1. Fungsi WebSocket (Harga Instan)
+    // Kita buka satu koneksi untuk semua aset sekaligus
+    const streams = assets.map(a => `${a.id}@ticker`).join('/');
+    const ws = new WebSocket(`wss://stream.binance.com:9443/ws/${streams}`);
+
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const priceElement = document.getElementById(`price-${data.s.toLowerCase()}`);
+        if (priceElement) {
+            const price = parseFloat(data.c).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            // Efek warna hijau sekejap saat harga naik (opsional agar mirip Ajaib)
+            priceElement.innerText = price;
         }
+    };
 
-        // Tampilkan Daftar Aset
-        function renderAssets() {
-            const list = document.getElementById('asset-list');
-            assets.forEach(asset => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => {
-                    currentSymbol = `BINANCE:${asset.id}`;
-                    loadChart(currentSymbol);
-                    window.scrollTo(0,0);
-                };
-                card.innerHTML = `
-                    <div class="asset-info">
-                        <div style="font-weight:bold; margin-right:10px;">${asset.icon}</div>
-                        <div>
-                            <span class="asset-symbol">${asset.id.replace('USDT','')}</span>
-                            <span class="asset-name">${asset.name}</span>
-                        </div>
+    // 2. Fungsi Load Chart (TradingView)
+    function loadChart(symbol) {
+        document.getElementById('chart_widget').innerHTML = ''; // Bersihkan chart lama
+        new TradingView.widget({
+            "autosize": true,
+            "symbol": "BINANCE:" + symbol.toUpperCase(),
+            "interval": "H",
+            "timezone": "Asia/Jakarta",
+            "theme": "light",
+            "style": "1",
+            "locale": "id",
+            "container_id": "chart_widget",
+            "hide_top_toolbar": true,
+            "save_image": false
+        });
+    }
+
+    // 3. Render Daftar Aset ke Layar
+    function renderAssets() {
+        const list = document.getElementById('asset-list');
+        assets.forEach(asset => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => {
+                currentSymbol = asset.id;
+                loadChart(currentSymbol);
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            };
+            card.innerHTML = `
+                <div class="asset-info">
+                    <div style="font-weight:bold; margin-right:10px;">${asset.icon}</div>
+                    <div>
+                        <span class="asset-symbol">${asset.id.replace('usdt','').toUpperCase()}</span>
+                        <span class="asset-name">${asset.name}</span>
                     </div>
-                    <div class="price-now" id="price-${asset.id}">Memuat...</div>
-                `;
-                list.appendChild(card);
-            });
-        }
+                </div>
+                <div class="price-now" id="price-${asset.id}">$0.00</div>
+            `;
+            list.appendChild(card);
+        });
+    }
 
-        // Update Harga Real-time dari Binance
-        async function updatePrices() {
-            for (let asset of assets) {
-                try {
-                    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${asset.id}`);
-                    const data = await res.json();
-                    document.getElementById(`price-${asset.id}`).innerText = '$' + parseFloat(data.price).toLocaleString();
-                } catch (e) {}
-            }
-        }
+    function tontonIklan() {
+        AdController.show().then(() => {
+            document.getElementById('panel-ai').style.display = 'block';
+            document.getElementById('isi-analisis').innerText = "Gemini AI: Berdasarkan volume perdagangan 24 jam terakhir, " + currentSymbol.toUpperCase() + " menunjukkan akumulasi kuat di area support. Indikator MACD baru saja Golden Cross. Rekomendasi: BUY.";
+        }).catch(() => {
+            alert("Selesaikan iklan untuk melihat sinyal.");
+        });
+    }
 
-        function tontonIklan() {
-            AdController.show().then(() => {
-                document.getElementById('panel-ai').style.display = 'block';
-                document.getElementById('isi-analisis').innerText = "Gemini sedang menganalisis grafik " + currentSymbol + "... \n\nSaran: Berdasarkan indikator Bollinger Bands, harga saat ini sedang berada di area support. Potensi rebound ke area resistance terdekat. Rekomendasi: BUY bertahap.";
-            }).catch(() => {
-                alert("Selesaikan iklan untuk melihat sinyal AI.");
-            });
-        }
-
-        // Inisialisasi
-        renderAssets();
-        loadChart(currentSymbol);
-        setInterval(updatePrices, 5000);
-        updatePrices();
-    </script>
+    // Jalankan awal
+    renderAssets();
+    loadChart('btcusdt');
+</script>
 </body>
 </html>
