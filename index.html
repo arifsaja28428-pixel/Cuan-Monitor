@@ -1,31 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitor Cuan AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+    <style>
+        :root {
+            --ajaib-blue: #2E68FF;
+            --ajaib-green: #00C566;
+            --bg-gray: #F8F9FB;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-gray);
+            margin: 0; padding: 16px; color: #333;
+        }
+        .header { margin-bottom: 24px; }
+        .header h1 { font-size: 20px; font-weight: 700; margin: 0; }
+        .header p { font-size: 14px; color: #666; margin-top: 4px; }
+
+        /* Gaya Kartu Aset mirip Ajaib */
+        .card {
+            background: white; border-radius: 12px;
+            padding: 16px; margin-bottom: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .asset-info { display: flex; align-items: center; }
+        .asset-logo { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            background: #eee; margin-right: 12px;
+            display: flex; align-items: center; justify-content: center; font-weight: bold;
+        }
+        .asset-name { font-weight: 600; font-size: 15px; }
+        .asset-price { text-align: right; }
+        .price-now { font-weight: 700; font-size: 15px; }
+        .price-change { color: var(--ajaib-green); font-size: 12px; font-weight: 600; }
+
+        /* Tombol Analisis AI */
+        .btn-ai {
+            background-color: var(--ajaib-blue); color: white;
+            border: none; border-radius: 8px; width: 100%;
+            padding: 14px; font-weight: 700; font-size: 14px;
+            cursor: pointer; margin-top: 20px;
+            transition: opacity 0.2s;
+        }
+        .btn-ai:active { opacity: 0.8; }
+
+        /* Panel Analisis Gemini */
+        #panel-ai {
+            display: none; background: #E9F0FF; border-radius: 12px;
+            padding: 16px; margin-top: 16px; border: 1px solid #D1E1FF;
+        }
+        .ai-title { color: var(--ajaib-blue); font-weight: 700; font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; }
+    </style>
 </head>
 <body>
-    <h1>Analisis Harga AI</h1>
-    <div id="harga-display">Memuat harga...</div>
-    
-    <button onclick="tontonIklan()">Lihat Saran Jual/Beli (AI)</button>
 
-    <div id="hasil-ai" style="display:none; margin-top:20px; border:1px solid #ccc; padding:10px;">
+    <div class="header">
+        <h1>Monitor Cuan AI</h1>
+        <p>Analisis Pasar Real-time</p>
+    </div>
+
+    <div class="card">
+        <div class="asset-info">
+            <div class="asset-logo" style="color: #F3BA2F;">₿</div>
+            <div class="asset-name">Bitcoin</div>
         </div>
+        <div class="asset-price">
+            <div class="price-now" id="btc-price">Memuat...</div>
+            <div class="price-change">+2.45%</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="asset-info">
+            <div class="asset-logo" style="color: #FFD700;">Au</div>
+            <div class="asset-name">Emas (Antam)</div>
+        </div>
+        <div class="asset-price">
+            <div class="price-now" id="gold-price">Rp1.450.000</div>
+            <div class="price-change">+0.15%</div>
+        </div>
+    </div>
+
+    <button class="btn-ai" onclick="tontonIklan()">✨ LIHAT ANALISIS BELI/JUAL (AI)</button>
+
+    <div id="panel-ai">
+        <div class="ai-title">🤖 Analisis Cerdas Gemini AI:</div>
+        <div id="isi-analisis" style="font-size: 13px; line-height: 1.5;"></div>
+    </div>
 
     <script>
+        // Masukkan ID Iklan kamu di sini
         const AdController = window.Adsgram.init({ blockId: "28860" });
 
         function tontonIklan() {
             AdController.show().then((result) => {
-                // Jika iklan selesai, tampilkan hasil AI
-                document.getElementById('hasil-ai').style.display = 'block';
-                document.getElementById('hasil-ai').innerText = "Gemini sedang berpikir...";
-                // Di sini nanti panggil fungsi dari app.py
-            }).catch((err) => {
-                alert("Silakan tonton iklan sampai habis untuk melihat analisis.");
+                document.getElementById('panel-ai').style.display = 'block';
+                document.getElementById('isi-analisis').innerText = "Gemini sedang menganalisis grafik teknikal untukmu...";
+                
+                // Simulasi panggil Gemini (Nanti kita hubungkan ke app.py)
+                setTimeout(() => {
+                    document.getElementById('isi-analisis').innerText = "Analisis BTC: RSI di 65 menunjukkan kondisi jenuh beli. Saran: HOLD. Untuk Emas: Tren jangka panjang bullish, cicil beli jika harga di bawah Rp1.400.000.";
+                }, 2000);
+            }).catch(() => {
+                alert("Tonton iklan sampai selesai untuk akses fitur cerdas AI.");
             });
         }
+
+        // Fungsi Ambil Harga Bitcoin Real-time (Sederhana)
+        async function fetchPrices() {
+            try {
+                const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
+                const data = await response.json();
+                document.getElementById('btc-price').innerText = '$' + parseFloat(data.price).toLocaleString();
+            } catch (e) {
+                document.getElementById('btc-price').innerText = 'Error';
+            }
+        }
+        setInterval(fetchPrices, 5000); // Update tiap 5 detik
+        fetchPrices();
     </script>
 </body>
 </html>
