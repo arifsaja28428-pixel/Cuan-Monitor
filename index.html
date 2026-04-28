@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monitor Cuan AI</title>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+</head>
+<body>
+    <h1>Analisis Harga AI</h1>
+    <div id="harga-display">Memuat harga...</div>
+    
+    <button onclick="tontonIklan()">Lihat Saran Jual/Beli (AI)</button>
+
+    <div id="hasil-ai" style="display:none; margin-top:20px; border:1px solid #ccc; padding:10px;">
+        </div>
+
+    <script>
+        const AdController = window.Adsgram.init({ blockId: "ISI_BLOCK_ID_ADSGRAM" });
+
+        function tontonIklan() {
+            AdController.show().then((result) => {
+                // Jika iklan selesai, tampilkan hasil AI
+                document.getElementById('hasil-ai').style.display = 'block';
+                document.getElementById('hasil-ai').innerText = "Gemini sedang berpikir...";
+                // Di sini nanti panggil fungsi dari app.py
+            }).catch((err) => {
+                alert("Silakan tonton iklan sampai habis untuk melihat analisis.");
+            });
+        }
+    </script>
+</body>
+</html>
